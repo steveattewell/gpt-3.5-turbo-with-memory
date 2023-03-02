@@ -110,7 +110,7 @@ if($text){
   //and push that into our "memory" of the last few interactions (dictated by $number_of_interactions_to_remember ).
   array_push($_SESSION['conversations'], $new_conversation);
 
-
+  // write out the response from the AI
   echo $content;
 }
 ?>
