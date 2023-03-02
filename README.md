@@ -29,6 +29,8 @@ You can make it forget previous interactions before answering by setting the ```
 
 ```callAI.php?forget=true&text=[the question you would like to ask the AI]```
 
+
 I can't find any guidance on how many interactions to remember if optimal, or how it affects costs. You're on your own there!
 
-
+## Security considerations 
+There are none in this script. If someone finds your hosted file they can start poking questions at it, getting responses, and spending your money at OpenAI. Consider this before using this script for anything live.
