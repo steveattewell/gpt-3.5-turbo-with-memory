@@ -16,13 +16,11 @@ Remember to place your OpenAI API Key in the script at ```$openai_api_key```. Yo
 ## It has a short term memory
 The script saves the last few interactions you had with the AI in a session variable and uses your chat history in subsequent calls to the AI. Again, there's more here about that https://platform.openai.com/docs/guides/chat/introduction 
 
-The 'memory' basically builds a longer and longer version of this call to the API so that the API takes into account the last few interactions with it;'s next reponse.
+The 'memory' basically builds a longer and longer version of this call to the API so that the API takes into account the last few interactions with it's next reponse.
+
 <img width="744" alt="The format of a request to the API" src="https://user-images.githubusercontent.com/21079244/222454340-62389145-bcaa-4e26-870e-76cfb03398bd.png">
 
 You can change the number of interactions to remember here ```$number_of_interactions_to_remember```
-
-
-
 
 I can't find any guidance on how many interactions to remember if optimal, or how it affects costs. You're on your own there!
 
