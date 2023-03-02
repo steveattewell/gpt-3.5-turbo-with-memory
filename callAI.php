@@ -10,10 +10,6 @@ You can optionally add ?forget=true to make the AI forget your previous response
 
 */
 
-
-//start a session and make sure the user has come from this website ///
-
-
 // SETUP VARIABLES:
 // =======================
 $openai_api_key = 'sk-[INSERT-YOUR-API-KEY-HERE]'; // your OpenAI API key. Get one from https://platform.openai.com/
