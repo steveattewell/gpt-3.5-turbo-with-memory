@@ -10,30 +10,82 @@ You can optionally add ?forget=true to make the AI forget your previous response
 
 */
 
-// SETUP VARIABLES:
-// =======================
-$openai_api_key = 'sk-[INSERT-YOUR-API-KEY-HERE]'; // your OpenAI API key. Get one from https://platform.openai.com/
-$number_of_interactions_to_remember = 10; // can be 0. Basically a "short term memory". Remembers the last n interactions. Allow you to ask follow-up questions like "tell me more about that" or "give me another example"
 
-// Get the querystring parameters.
+//start a session and make sure the user has come from this website ///
 
+session_start();
+$testmode = isset($_GET['testmode']) ? $_GET['testmode'] : null;
 $forget = isset($_GET['forget']) ? $_GET['forget'] : null;
-$text = isset($_GET['text']) ? $_GET['text'] : null;
-
-
 if($forget){
   // forget the previous interactions
     $_SESSION['conversations'] = null;
+    echo "forgotten";
 }
+// hide all errors
+//================================
+/*
+error_reporting(E_ALL);
+// Define a custom error handler function
+function customErrorHandler($errno, $errstr, $errfile, $errline) {
+    die("Sorry, something went wrong and I was unable to respond");
+
+}
+// Set the custom error handler function
+set_error_handler("customErrorHandler");
+*/
+
+
+//// SECURITY CHECK COMPLETE
+
+// SETUP VARIABLES:
+// =======================
+$openai_api_key = '[YOUR_API_KEY_GOES_HERE]'; // your OpenAI API key. Get one from https://platform.openai.com/
+$number_of_interactions_to_remember = 5; // can be 0. Basically a "short term memory". Remembers the last n interactions. Allow you to ask follow-up questions like "tell me more about that" or "give me another example"
+
+
+
+// Get the querystring parameters.
+
+
+$text = isset($_GET['text']) ? $_GET['text'] : null;
+
+
+
+
+
+
 if($text){
+
+
+ //detect if there is some mention of date or time in the text:
+  // ========================================================
+    // Define the keywords to search for
+    $keywords = array('time', 'date', 'day is it');
+
+    // Check if the text contains any of the keywords
+    $containsKeyword = false;
+    $regex = '/\b(' . implode('|', $keywords) . ')\b/i';
+    $containsKeyword = preg_match($regex, $text);
+    
+    // If the text contains a keyword, call the getWeather() function
+    if ($containsKeyword) {
+        $datetime = getDateTime(); 
+        $text = "It is " . $datetime . ". If appropriate, respond to 
+        the following in a short sentence: " . $text;
+    }
+    
+
+
+
+
   // set up a session variable to store the last n questions and responses
   if (!isset($_SESSION['conversations'])) {
     $_SESSION['conversations'] = array();
   }
 
   // Remove oldest conversation if the number oif interactions >= $number_of_interactions_to_remember 
-  if (count($_SESSION['conversations']) >= $number_of_interactions_to_remember) {
-    array_shift($_SESSION['conversations']);
+  if (count($_SESSION['conversations']) > $number_of_interactions_to_remember + 1) {
+    $_SESSION['conversations'] = array_slice($_SESSION['conversations'], -$number_of_interactions_to_remember, $number_of_interactions_to_remember, true);
   }
 
 
@@ -43,7 +95,8 @@ if($text){
     'messages' => array(
       array(
         'role' => 'system',
-        'content' => 'You are a helpful assistant called Frank that gives short, friendly reponses.'
+        'content' => 'You are called Chatty McChatface. 
+        You give short, friendly reponses. '
       )
       
     )
@@ -87,10 +140,27 @@ if($text){
   ));
 
   $response = curl_exec($curl);
-  //echo $response;
+
+  if($testmode){
+    //write out the previous conversation
+    echo json_encode($data);
+    echo "<br><br>";
+    //write out the latest response
+    echo $response;
+    echo "<br><br>";
+  }
   $response = json_decode($response, true);
+  
   curl_close($curl);
-  $content = $response['choices'][0]['message']['content'];
+
+  if (isset($response['choices'][0]['message']['content'])) {
+    // The key exists, do something here
+    $content = $response['choices'][0]['message']['content'];
+  } else {
+      // The key doesn't exist
+      $content = "Something went wrong! ```" . json_encode($response) . "```";
+  }
+  
 
 
   // Add new conversation to end of the conversation array (we'll use this in the next prompt so that the AI has a short term memory of our last 10 interactions)
@@ -110,7 +180,8 @@ if($text){
   //and push that into our "memory" of the last few interactions (dictated by $number_of_interactions_to_remember ).
   array_push($_SESSION['conversations'], $new_conversation);
 
-  // write out the response from the AI
+
   echo $content;
 }
+
 ?>
